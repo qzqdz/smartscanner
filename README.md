@@ -1,5 +1,3 @@
-Here's a README for the main program based on the paper's abstract, introduction, and title:
-
 # Retrieval for Audit: Vulnerability Detection in Smart Contracts
 
 This project implements a novel approach for detecting vulnerabilities in smart contracts using an image-inspired retrieval method. The main program is designed to work with unlimited-length smart contract source code.
@@ -45,16 +43,20 @@ python your_script_name.py --do_train --epochs 5 --batch_size 8 --lr 1e-4 --pool
 - Scikit-learn
 - Loguru
 
-For a complete list of dependencies, refer to `requirements.txt`.
+
+
+
+## Clarification
+
+For more details on the methodology and results, please refer to the full paper.
+
+We provide the data sources with the key code for demonstrating the contribution of our study. After our study is formally published, we will release all the code of our work.
 
 ## Citation
 
 If you use this code in your research, please cite our paper:
-
-[Include citation information here]
+xxx
 
 ## License
 
-[Specify the license under which this code is released]
-
-For more details on the methodology and results, please refer to the full paper.
+[license]
