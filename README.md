@@ -23,7 +23,7 @@ To use the program:
 3. Run the main script with appropriate arguments:
 
 ```
-python your_script_name.py --do_train --epochs 5 --batch_size 8 --lr 1e-4 --pooling last-avg --model_path "/path/to/model" --use_teacher --use_teacher_embedding --teacher_model "/path/to/teacher/model" --snli_train "/path/to/train/data" --sts_dev "/path/to/dev/data" --sts_test "/path/to/test/data" --acc_train "/path/to/test/data" --acc_val  "/path/to/test/data" --acc_batch_size 4 --acc_maxlen 64 --acc_k 5 --seed 3402
+python main.py --do_train --epochs 5 --batch_size 8 --lr 1e-4 --pooling last-avg --model_path "/path/to/model" --use_teacher --use_teacher_embedding --teacher_model "/path/to/teacher/model" --snli_train "/path/to/train/data" --sts_dev "/path/to/dev/data" --sts_test "/path/to/test/data" --acc_train "/path/to/test/data" --acc_val  "/path/to/test/data" --acc_batch_size 4 --acc_maxlen 64 --acc_k 5 --seed 3402
 ```
 
 ## Main Components
