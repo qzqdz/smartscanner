@@ -4,7 +4,7 @@ This project implements a novel approach for detecting vulnerabilities in smart 
 
 ## Abstract
 
-We propose a "Retrieval for Audit" paradigm for smart contract vulnerability detection. Our approach uses a lightweight contract embedding tool named CCRNet (Residual Network with Code Compositional Encoding) to identify and amplify sparse vulnerability features. The system retrieves similar bug contracts for heuristic reference, outperforming classifier-based methods on a large-scale smart contract benchmark.
+We propose a "Retrieval for Audit" paradigm for smart contract vulnerability detection. Our approach uses a lightweight contract embedding tool named SmartScanner to identify and amplify sparse vulnerability features. The system retrieves similar bug contracts for heuristic reference, outperforming classifier-based methods on a large-scale smart contract benchmark.
 
 ## Key Features
 
