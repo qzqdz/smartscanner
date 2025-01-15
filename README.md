@@ -1,4 +1,4 @@
-# Retrieval for Audit: Vulnerability Detection in Smart Contracts
+# SmartScanner: Lightweight Vulnerability Scanner for Extreme-Length Smart Contract Auditing
 
 This project implements a novel approach for detecting vulnerabilities in smart contracts using an image-inspired retrieval method. The main program is designed to work with unlimited-length smart contract source code.
 
