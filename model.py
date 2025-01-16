@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 import math
 
 import torch
@@ -10,6 +11,8 @@ from capsule_layer import CapsuleLinear,CapsuleConv2d
 from src.modeling.network.rankcse.models import ListNet
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
 
 def simcse_sup_loss(y_pred: 'tensor') -> 'tensor':
     """有监督的损失函数
@@ -178,14 +181,15 @@ class ResBlock1D(nn.Module):
 
 
 
+# 1d_ResNet 9
 class SimcseModel(nn.Module):
     def __init__(self, pretrained_model, pooling='cls', only_embeddings=False, teacher_isavailable=False):
         super(SimcseModel, self).__init__()
         self.only_embeddings = only_embeddings
-        self.teacher_isavailable = teacher_isavailable
         config = AutoConfig.from_pretrained(pretrained_model)
         self.pooling = pooling
         self.num_sen = 3
+
         # v1
         # embedding_size = 64
         # num_codebook = 8
@@ -202,16 +206,11 @@ class SimcseModel(nn.Module):
         self.embedding = CompositionalEmbedding(config.vocab_size, embedding_size, num_codebook, num_codeword,
                                                 weighted=True)
 
-        self.embedding2 = CompositionalEmbedding(config.vocab_size, embedding_size, num_codebook, num_codeword,
-                                                 weighted=True)
-
-
 
 
         # 使用nn.Sequential构建1d_resnet结构
         self.layers = nn.Sequential(
             nn.Conv1d(in_channels=embedding_size, out_channels=128, kernel_size=3, stride=3),
-            # nn.Conv1d(in_channels=embedding_size * 2, out_channels=128, kernel_size=3, stride=3),
             nn.BatchNorm1d(num_features=128),
             nn.LeakyReLU(),
             ResBlock1D(in_channels=128, out_channels=128),
@@ -241,30 +240,6 @@ class SimcseModel(nn.Module):
         )
 
 
-        if self.teacher_isavailable:
-            # self.unfreeze_module(self.embedding)  # 第一阶段，解冻self.embedding
-            self.freeze_module(self.embedding2)  # 同时冻结self.embedding2
-
-
-            # 知识兼容
-            self.freeze_module(self.layers)
-            # 在模型的某个测试点调用此函数
-            self.check_frozen_status(self.layers)
-            # # 示例：检查layers模块中参数的状态
-            # for name, param in self.layers.named_parameters():
-            #     print(f"{name} requires_grad: {param.requires_grad}")
-            #
-            # # 检查BatchNorm层的运行模式
-            # for layer in self.layers.modules():
-            #     if isinstance(layer, nn.BatchNorm1d):
-            #         print(f"BatchNorm1d in eval mode: {not layer.training}")
-
-        else:
-            # self.unfreeze_module(self.embedding2)  # 第二阶段，解冻self.embedding2
-            # self.unfreeze_module(self.embedding)
-            self.freeze_module(self.embedding)  # 同时冻结self.embedding
-
-
         # 对比学习
         self.div = Divergence(beta_=0.5)
         self.sim = Similarity(temp=0.05)
@@ -276,113 +251,8 @@ class SimcseModel(nn.Module):
         self.distillation_loss_fct = ListNet(tau2, gamma_)
 
 
-    def freeze_module_only_itself(self, module):
-        """冻结模块的参数，使其在训练中不更新"""
-        for param in module.parameters():
-            param.requires_grad = False
-
-    # def freeze_module(self, module):
-    #     """冻结模块的参数，并确保所有批量归一化层都被设置为评估模式"""
-    #     # for param in module.parameters():
-    #     #     param.requires_grad = False
-    #
-    #     for child in module.children():
-    #         # 冻结所有参数
-    #         for param in child.parameters():
-    #             param.requires_grad = False
-    #         # 检查批量归一化层并设置为评估模式
-    #         if isinstance(child, nn.BatchNorm1d):
-    #             child.eval()
-    #         # 递归地应用到所有子模块
-    #         self.freeze_module(child)
-
-    def freeze_module(self, module):
-        """冻结模块中所有BatchNorm1d层的参数，并确保它们被设置为评估模式"""
-        for child in module.children():
-            if isinstance(child, nn.BatchNorm1d):
-                # 冻结BatchNorm1d层的所有参数
-                for param in child.parameters():
-                    param.requires_grad = False
-                # 将BatchNorm1d层设置为评估模式
-                child.eval()
-            # 递归地应用到所有子模块
-            self.freeze_module(child)
-
-    def unfreeze_module(self, module):
-        """解冻模块的参数，使其在训练中可以更新"""
-        for param in module.parameters():
-            param.requires_grad = True
-
-    def check_frozen_status(self, module):
-        for child in module.children():
-            if isinstance(child, nn.BatchNorm1d):
-                print(f"BatchNorm1d layer {child} is frozen with eval mode: {not child.training}")
-            elif hasattr(child, 'parameters'):
-                for name, param in child.named_parameters():
-                    print(f"{name} requires_grad: {param.requires_grad}")
-            self.check_frozen_status(child)  # 递归检查
-
     def forward(self, input_ids, attention_mask, token_type_ids, teacher_top1_sim_pred=None, teacher_embedding=None):
-
-
-
-        if self.training and self.teacher_isavailable:
-
-            # self.unfreeze_module(self.embedding)  # 第一阶段，解冻self.embedding
-            self.freeze_module_only_itself(self.embedding2)  # 同时冻结self.embedding2
-
-
-            # 知识兼容
-            self.freeze_module(self.layers)
-
-
-            # embeddings = self.embedding(input_ids)
-            # embeddings2 = self.embedding2(input_ids)
-            # embeddings = embeddings + embeddings2
-
-            embeddings = self.embedding2(input_ids)
-
-            # embeddings = torch.cat([embeddings, embeddings], dim=-1)
-            # print(embeddings.shape)
-        elif self.training and not self.teacher_isavailable:
-
-            # self.unfreeze_module(self.embedding2)  # 第二阶段，解冻self.embedding2
-            # self.unfreeze_module(self.embedding)
-            # self.freeze_module_only_itself(self.embedding)  # 同时冻结self.embedding
-            self.freeze_module(self.layers)
-            self.freeze_module_only_itself(self.embedding2)  # 同时冻结self.embedding2
-
-            # stage 1+2
-            # embeddings = self.embedding(input_ids)
-            embeddings = self.embedding2(input_ids)  # 使用self.embedding2生成嵌入
-            # embeddings = embeddings+embeddings2
-
-        else:
-            # stage 1+2
-            # embeddings = self.embedding(input_ids)
-            # embeddings2 = self.embedding2(input_ids)  # 使用self.embedding2生成嵌入
-            # embeddings = embeddings+embeddings2
-            # stage 1
-            # embeddings = self.embedding(input_ids)
-
-            # stage 2
-            embeddings = self.embedding2(input_ids)
-
-            # joint concat
-            # embeddings = torch.cat([embeddings, embeddings2], dim=1)
-            # embeddings = torch.cat([embeddings2, 0.5*embeddings+embeddings2], dim=1)
-
-            # jc v2
-            # embeddings = torch.cat([embeddings+embeddings2, embeddings2], dim=1)
-
-            # jc v3
-            # embeddings = torch.cat([embeddings+embeddings2, embeddings2, embeddings], dim=1)
-
-            # stack
-            # embeddings = torch.cat([embeddings, embeddings2], dim=-1)
-
-
-
+        embeddings = self.embedding(input_ids)
         embeddings = embeddings.permute(0, 2, 1)  # 调整维度以适应Conv1d
         sent_rep = self.layers(embeddings)
         # 这里返回的feature_rep可用于后续的任务，如分类、相似度计算等
@@ -391,36 +261,12 @@ class SimcseModel(nn.Module):
         # 根据训练模式返回不同的输出
         if self.training and not self.only_embeddings:
 
-            # if self.pooling == 'cls':
-            #     sent_rep_2 = encoder_outputs[:, 0, :]
-            # elif self.pooling == 'last-avg':
-            #     fwd_output = encoder_outputs[:, :, :self.hidden_size]
-            #     bwd_output = encoder_outputs[:, :, self.hidden_size:]
-            #     avg_fwd = torch.mean(fwd_output, dim=1)
-            #     avg_bwd = torch.mean(bwd_output, dim=1)
-            #     sent_rep_2 = torch.cat([avg_fwd, avg_bwd], dim=1)
-            #
-            # # sent_rep_2 = self.dropout(sent_rep_2)
-            #
-            # z1_z2_cos = self.sim(sent_rep, sent_rep_2)
-            # # z2_z1_cos = self.sim(sent_rep, sent_rep_2)
-            # z2_z1_cos = self.sim(sent_rep_2, sent_rep)
-
-            # print(z2_z1_cos,z1_z2_cos)
-            # 计算自蒸馏损失
-            # sd_loss = self.div(z1_z2_cos.softmax(dim=-1).clamp(min=1e-7), z2_z1_cos.softmax(dim=-1).clamp(min=1e-7))
-            # sd_loss = self.div(z1_z2_cos, z2_z1_cos)
-            # 或者使用负余弦相似度作为自蒸馏损失
-            # sd_loss = 1 - (z1_z2_cos.softmax(dim=-1).clamp(min=1e-7) * z2_z1_cos.softmax(dim=-1).clamp(min=1e-7)).sum(dim=-1).mean()
-
             # 计算损失
             loss = simcse_sup_loss(sent_rep)
 
             # -----------------
             # Separate representation
             # v1
-
-
             batch_size = input_ids.size(0)
             sent_rep = sent_rep.view((batch_size//self.num_sen, self.num_sen, sent_rep.size(-1)))
             z1, z2 = sent_rep[:, 0], sent_rep[:, 1]
@@ -429,15 +275,7 @@ class SimcseModel(nn.Module):
                 z3 = sent_rep[:, 2]
 
             # v2-----------------
-            # batch_size = input_ids.size(0)
-            # sent_rep = sent_rep.view((batch_size//self.num_sen, self.num_sen, sent_rep.size(-1)))
-            # shuffle_indices = torch.randperm(sent_rep.size(0))
-            # shuffled_sent_rep = sent_rep.clone()
-            # shuffled_sent_rep[:, 0], shuffled_sent_rep[:, 1] = sent_rep[shuffle_indices][:, 1], sent_rep[shuffle_indices][:,0]
-            #
-            # z1, z2 = shuffled_sent_rep[:, 0], shuffled_sent_rep[:, 1]
 
-            # -----------------
             z1_z2_cos = self.sim(z1.unsqueeze(1), z2.unsqueeze(0))
             z2_z1_cos = self.sim(z2.unsqueeze(1), z1.unsqueeze(0))
             # print(z1_z2_cos.shape)
@@ -449,21 +287,6 @@ class SimcseModel(nn.Module):
                 z2_z3_cos = self.sim(z2.unsqueeze(1), z3.unsqueeze(0))
                 z1_z2_cos = torch.cat([z1_z2_cos, z1_z3_cos], 1)
                 z2_z1_cos = torch.cat([z2_z1_cos, z2_z3_cos], 1)
-
-            # --------
-            # 随机选择要交换的索引
-            # num_rows, num_cols = z1_z2_cos.shape
-            # row_idx = torch.randint(0, num_rows, (1,)).item()
-            # col_idx = torch.randint(0, num_cols, (1,)).item()
-            #
-            # # 在相同i,j位置上进行数值交换
-            # temp = z1_z2_cos[row_idx, col_idx].clone()
-            # z1_z2_cos[row_idx, col_idx] = z2_z1_cos[row_idx, col_idx]
-            # z2_z1_cos[row_idx, col_idx] = temp
-
-
-            # --------
-
 
             sd_loss = self.div(z1_z2_cos.softmax(dim=-1).clamp(min=1e-7), z2_z1_cos.softmax(dim=-1).clamp(min=1e-7))
 
@@ -479,17 +302,7 @@ class SimcseModel(nn.Module):
                 else:
                     align_loss_value = 0
 
-                # 计算KL散度损失
-                # if teacher_embedding is not None:
-                #     student_logits = F.log_softmax(z1, dim=-1)
-                #     teacher_logits = F.softmax(teacher_embedding, dim=-1)
-                #     kl_div_loss = F.kl_div(student_logits, teacher_logits, reduction='batchmean')
-                # else:
-                #     kl_div_loss = 0
-
-                # print('hello')
-
-                # loss = loss + 0.1 * sd_loss + 1 * kd_loss
+                loss = loss + 0.1 * sd_loss + 0.1 * kd_loss
                 # loss = loss + 0.1 * sd_loss + kd_loss + align_loss_value
                 # loss = loss + kd_loss + align_loss_value
                 # loss = kd_loss
@@ -502,16 +315,13 @@ class SimcseModel(nn.Module):
 
             # loss = loss + 0.5*sd_loss
             # print(f"Primary loss: {loss.item()}, Self-distillation loss: {sd_loss.item()}")
-
             loss = loss + 0.1*sd_loss
             # loss = sd_loss
 
 
-
-
-            return loss, sent_rep
+            return loss, sent_rep, embeddings
         else:
-            return sent_rep
+            return sent_rep, embeddings
 
 
 

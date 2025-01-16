@@ -1,10 +1,51 @@
+# Experimental Results Analysis
+
+## Key Findings
+
+### 1. Overall Retrieval Performance
+- Label-based retrieval accuracy ranges between 85%-92%
+- KNN-based retrieval accuracy ranges between 88%-92%
+- Top@K performance improves with increasing K values:
+  - Top@5: 96.49%
+  - Top@10: 97.62%
+  - Top@20: 98.32%
+
+### 2. Impact of Corpus Size
+| Corpus Size | Label-based | KNN-based |
+|-------------|-------------|-----------|
+| 50 samples  | 87.22%      | 90.42%    |
+| 100 samples | 85.31%      | 88.94%    |
+| 400 samples | 90.20%      | 92.42%    |
+| 1000 samples| 91.26%      | 92.79%    |
+
+### 3. Parameter Configuration Effects
+- At 1000 sample scale, different parameter combinations (1_1 to 1_7) show:
+  - Best performance achieved with 1_1 configuration: Label-based 91.99%
+  - Performance generally decreases with increasing parameter values
+
+## Analysis
+
+The experimental results demonstrate strong model performance in code similarity retrieval tasks, particularly with larger corpus sizes. The following observations are noteworthy:
 
 
 
+### 4. Experimental Records
 
-```python
+The above experiments were conducted with various configurations and parameters:
+
+- Training command with seed 3402, max length 24000, learning rate 1e-3
+- Model paths using solidity_codebert as base model
+- Dataset variations:
+  - SC-big-250000-24000 for training
+  - Different corpus sizes (50, 100, 400, 1000 samples) for testing
+- Training parameters:
+  - 30 epochs
+  - Batch sizes of 16/32
+  - last-avg pooling strategy
+  - Different parameter combinations (1_1 to 1_7)
 
 
+```
 
 python main.py --seed 3402  --maxlen 24000  --lr 1e-3  --save_path ./saved_model/SC_model_big_long_resnet_1d_more_consis/pytorch_model.bin    --model_path "E:/model/white_model/solidity_codebert"   --teacher_model "E:/model/white_model/solidity_codebert" --snli_train "./datasets/SC-big-250000-24000/target_texts.json" --sts_dev "./datasets/SC-big-250000-24000/val_dataset.json" --sts_test "./datasets/SC-big/test_dataset_soft_100_512_1000.json" --acc_train "./datasets/SC-big/acc_train.json" --acc_val "./datasets/SC-big/acc_test.json"  --acc_k 2  --epochs 30 --batch_size 32 --pooling last-avg --do_train
 
@@ -98,12 +139,6 @@ KNN-based Retrieval Accuracy: 0.9263 | Precision: 0.9572 | Recall: 0.9210 | F1-s
 
 Label-based Retrieval Accuracy: 0.9179088586030665
 KNN-based Retrieval Accuracy: 0.9200 | Precision: 0.9588 | Recall: 0.9087 | F1-score: 0.9331
-
-
-
-'''
-
-
 
 ```
 
