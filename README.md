@@ -1,10 +1,10 @@
-# SmartScanner: Lightweight Vulnerability Scanner for Extreme-Length Smart Contract Auditing
+# CCRNet: Lightweight Vulnerability Scanner for Extreme-Length Smart Contract Auditing
 
 This project implements a novel approach for detecting vulnerabilities in smart contracts using an image-inspired retrieval method. The main program is designed to work with unlimited-length smart contract source code.
 
 ## Abstract
 
-Our approach uses a lightweight contract embedding tool named SmartScanner to identify and amplify sparse vulnerability features. The system retrieves similar bug contracts for heuristic reference, outperforming classifier-based methods on a large-scale smart contract benchmark.
+Our approach uses a lightweight contract embedding tool named CCRNet to identify and amplify sparse vulnerability features. The system retrieves similar bug contracts for heuristic reference, outperforming classifier-based methods on a large-scale smart contract benchmark.
 
 ## Key Features
 
