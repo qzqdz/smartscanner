@@ -19,7 +19,13 @@ from transformers import AutoTokenizer
 from tqdm import tqdm
 import numpy as np
 from model import SimcseModel
-from src.modeling.network.rankcse.teachers import *
+try:
+    from src.modeling.network.rankcse.teachers import *
+    _HAS_TEACHER = True
+except ImportError as _e:
+    _HAS_TEACHER = False
+    import warnings as _w
+    _w.warn(f"[main.py] rankcse.teachers unavailable ({_e}); --use_teacher disabled")
 import copy
 from torchinfo import summary
 from sklearn.metrics import precision_recall_fscore_support, confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
@@ -62,7 +68,14 @@ def load_data(name: str, path: str) -> List:
     def load_sc_dev_data(path):
         with open(path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            return [(item['str1'], item['str2'], str(item['similarity'])) for item in data]
+        # 兼容两种格式: 1) dict-of-fields  2) list-of-list [s1, s2, score]
+        out = []
+        for item in data:
+            if isinstance(item, dict):
+                out.append((item['str1'], item['str2'], str(item['similarity'])))
+            else:  # list/tuple
+                out.append((item[0], item[1], str(item[2])))
+        return out
 
 
     assert name in ["snli", "lqcmc", "sts", "sc_dev", "sc_train"]
@@ -131,7 +144,7 @@ class TextDataset(Dataset):
     def __getitem__(self, idx):
         text = str(self.texts[idx])
         label = int(self.labels[idx])
-        inputs = self.tokenizer.encode_plus(
+        inputs = self.tokenizer(
             text,
             None,
             add_special_tokens=True,
@@ -172,6 +185,9 @@ def eval(model, dataloader) -> float:
                 source_token_type_ids = source_token_type_ids.squeeze(1).to(DEVICE)
 
             source_pred = model(source_input_ids, source_attention_mask, source_token_type_ids)
+            # eval() 模式 model 返回 (sent_rep, embeddings) tuple
+            if isinstance(source_pred, (tuple, list)):
+                source_pred = source_pred[0]
             # target        [batch, 1, seq_len] -> [batch, seq_len]
 
             target_input_ids = target['input_ids'].squeeze(1).to(DEVICE)
@@ -182,6 +198,8 @@ def eval(model, dataloader) -> float:
                 target_token_type_ids = target_token_type_ids.squeeze(1).to(DEVICE)
 
             target_pred = model(target_input_ids, target_attention_mask, target_token_type_ids)
+            if isinstance(target_pred, (tuple, list)):
+                target_pred = target_pred[0]
             # concat
             sim = F.cosine_similarity(source_pred, target_pred, dim=-1)
             sim_tensor = torch.cat((sim_tensor, sim), dim=0)
@@ -257,8 +275,9 @@ def train(args, model, train_dl, dev_dl, optimizer, teacher=None) -> None:
                 # print(teacher_top1_sim_pred)
 
         # print(input_ids.shape)
-        # simcse训练 change
-        loss, _ = model(input_ids, attention_mask, token_type_ids, teacher_top1_sim_pred, teacher_embeddings)
+        # simcse训练 change; model 返回 (loss, sent_rep[, embeddings])
+        _ret = model(input_ids, attention_mask, token_type_ids, teacher_top1_sim_pred, teacher_embeddings)
+        loss = _ret[0]
         # loss = simcse_sup_loss(out)
 
         optimizer.zero_grad()
@@ -324,6 +343,9 @@ def acc_eval(train_path, val_path, model, tokenizer, device, batch_size, max_len
                 attention_mask = batch['attention_mask'].to(device)
                 token_type_ids = torch.zeros_like(input_ids).to(device)
                 output = model(input_ids, attention_mask, token_type_ids)
+                # eval() 模式 model 返回 (sent_rep, embeddings) tuple
+                if isinstance(output, (tuple, list)):
+                    output = output[0]
                 embeddings.extend(output.cpu().numpy())
                 labels.extend(batch['labels'].cpu().numpy())
         return np.array(embeddings), np.array(labels)
@@ -402,6 +424,8 @@ def knn_eval(train_path, val_path, model, tokenizer, device, batch_size, max_len
                 attention_mask = batch['attention_mask'].to(device)
                 token_type_ids = torch.zeros_like(input_ids).to(device)
                 output = model(input_ids, attention_mask, token_type_ids)
+                if isinstance(output, (tuple, list)):
+                    output = output[0]
                 embeddings.extend(output.cpu().numpy())
                 labels.extend(batch['labels'].cpu().numpy())
         return np.array(embeddings), np.array(labels)
@@ -627,6 +651,8 @@ if __name__ == '__main__':
     teacher_isavailable = False
     teacher = None
     if args.use_teacher:
+        if not _HAS_TEACHER:
+            raise RuntimeError("--use_teacher requested but rankcse.teachers import failed")
         teacher = Teacher(model_name_or_path=args.teacher_model, pooler=args.teacher_pooler, device=DEVICE)
         teacher_isavailable = True
     model = SimcseModel(pretrained_model=args.model_path, pooling=args.pooling, teacher_isavailable=teacher_isavailable)

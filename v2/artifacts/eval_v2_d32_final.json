@@ -1,0 +1,42 @@
+{
+  "wc": {
+    "macro_F1": 0.6155,
+    "macro_AUC": 0.8458,
+    "ac_recall": 0.4079,
+    "ci_macro_F1": [
+      0.5284,
+      0.6775
+    ],
+    "ci_macro_AUC": [
+      0.8084,
+      0.8722
+    ],
+    "ci_ac_recall": [
+      0.269,
+      0.5111
+    ],
+    "split": "split_wc",
+    "n_query": 3259,
+    "tag": "v2_d32_final"
+  },
+  "dc": {
+    "macro_F1": 0.3361,
+    "macro_AUC": 0.6635,
+    "ac_recall": 0.0829,
+    "ci_macro_F1": [
+      0.3101,
+      0.3607
+    ],
+    "ci_macro_AUC": [
+      0.6439,
+      0.6816
+    ],
+    "ci_ac_recall": [
+      0.0435,
+      0.1196
+    ],
+    "split": "split_dc",
+    "n_query": 1320,
+    "tag": "v2_d32_final"
+  }
+}

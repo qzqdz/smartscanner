@@ -1,0 +1,188 @@
+{
+  "n_clean": 3588,
+  "matched_in_bench": 3588,
+  "in3600": 3600,
+  "partial": false,
+  "emb": "v2_d16",
+  "flip_stats": {
+    "access_control": {
+      "dirty_pos": 478,
+      "clean_pos": 660,
+      "flip_1to0": 377,
+      "flip_0to1": 559,
+      "churn_1to0_over_dirtypos": 0.7887,
+      "churn_0to1_over_cleanpos": 0.847
+    },
+    "reentrancy": {
+      "dirty_pos": 1047,
+      "clean_pos": 951,
+      "flip_1to0": 655,
+      "flip_0to1": 559,
+      "churn_1to0_over_dirtypos": 0.6256,
+      "churn_0to1_over_cleanpos": 0.5878
+    },
+    "arithmetic": {
+      "dirty_pos": 616,
+      "clean_pos": 566,
+      "flip_1to0": 514,
+      "flip_0to1": 464,
+      "churn_1to0_over_dirtypos": 0.8344,
+      "churn_0to1_over_cleanpos": 0.8198
+    },
+    "unchecked_calls": {
+      "dirty_pos": 1557,
+      "clean_pos": 1164,
+      "flip_1to0": 764,
+      "flip_0to1": 371,
+      "churn_1to0_over_dirtypos": 0.4907,
+      "churn_0to1_over_cleanpos": 0.3187
+    }
+  },
+  "label_source_diagnostic_NONDISCRIMINATING": {
+    "split_wc": {
+      "dirty": {
+        "access_control": {
+          "P": 0.3818,
+          "R": 0.2386,
+          "F1": 0.2937,
+          "AUC": 0.7202,
+          "pos": 88
+        },
+        "reentrancy": {
+          "P": 0.6271,
+          "R": 0.6852,
+          "F1": 0.6549,
+          "AUC": 0.8507,
+          "pos": 216
+        },
+        "arithmetic": {
+          "P": 0.4691,
+          "R": 0.314,
+          "F1": 0.3762,
+          "AUC": 0.7385,
+          "pos": 121
+        },
+        "unchecked_calls": {
+          "P": 0.6995,
+          "R": 0.8438,
+          "F1": 0.7649,
+          "AUC": 0.8428,
+          "pos": 320
+        },
+        "macro_F1": 0.5224,
+        "macro_AUC": 0.788,
+        "ac_recall": 0.2386,
+        "n_query": 749,
+        "n_gallery": 2839
+      },
+      "clean": {
+        "access_control": {
+          "P": 0.5918,
+          "R": 0.2,
+          "F1": 0.299,
+          "AUC": 0.6462,
+          "pos": 145
+        },
+        "reentrancy": {
+          "P": 0.5109,
+          "R": 0.3182,
+          "F1": 0.3922,
+          "AUC": 0.6955,
+          "pos": 220
+        },
+        "arithmetic": {
+          "P": 0.6102,
+          "R": 0.3273,
+          "F1": 0.426,
+          "AUC": 0.7429,
+          "pos": 110
+        },
+        "unchecked_calls": {
+          "P": 0.5905,
+          "R": 0.5254,
+          "F1": 0.5561,
+          "AUC": 0.7407,
+          "pos": 236
+        },
+        "macro_F1": 0.4183,
+        "macro_AUC": 0.7063,
+        "ac_recall": 0.2,
+        "n_query": 749,
+        "n_gallery": 2839
+      }
+    },
+    "split_dc": {
+      "dirty": {
+        "access_control": {
+          "P": 0.3077,
+          "R": 0.0976,
+          "F1": 0.1481,
+          "AUC": 0.5342,
+          "pos": 41
+        },
+        "reentrancy": {
+          "P": 0.4,
+          "R": 0.4878,
+          "F1": 0.4396,
+          "AUC": 0.703,
+          "pos": 82
+        },
+        "arithmetic": {
+          "P": 0.2558,
+          "R": 0.1774,
+          "F1": 0.2095,
+          "AUC": 0.5861,
+          "pos": 62
+        },
+        "unchecked_calls": {
+          "P": 0.5474,
+          "R": 0.6356,
+          "F1": 0.5882,
+          "AUC": 0.6969,
+          "pos": 118
+        },
+        "macro_F1": 0.3464,
+        "macro_AUC": 0.63,
+        "ac_recall": 0.0976,
+        "n_query": 298,
+        "n_gallery": 1176
+      },
+      "clean": {
+        "access_control": {
+          "P": 0.2143,
+          "R": 0.0476,
+          "F1": 0.0779,
+          "AUC": 0.5769,
+          "pos": 63
+        },
+        "reentrancy": {
+          "P": 0.4259,
+          "R": 0.217,
+          "F1": 0.2875,
+          "AUC": 0.5718,
+          "pos": 106
+        },
+        "arithmetic": {
+          "P": 0.4545,
+          "R": 0.1,
+          "F1": 0.1639,
+          "AUC": 0.6712,
+          "pos": 50
+        },
+        "unchecked_calls": {
+          "P": 0.3387,
+          "R": 0.2471,
+          "F1": 0.2857,
+          "AUC": 0.5366,
+          "pos": 85
+        },
+        "macro_F1": 0.2038,
+        "macro_AUC": 0.5891,
+        "ac_recall": 0.0476,
+        "n_query": 298,
+        "n_gallery": 1176
+      }
+    }
+  },
+  "out_table": "/home/qzqdz/Desktop/project/smart-contract-security/smartscanner/code_icde/v2/bench/clean_bench.parquet"
+}

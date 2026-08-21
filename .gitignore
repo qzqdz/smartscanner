@@ -137,3 +137,25 @@ cython_debug/
 # Project specific
 test.py
 dataset/acc_test_100_24000.json
+
+# ---- 数据 / 模型二进制(2026-08-20 补) ----
+v2/bench/
+dataset/
+saved_model/
+SC_model_big_long_resnet_1d_24000/
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+*.parquet
+*.pkl
+*.zip
+*.h5
+*.hdf5
+*.safetensors
+*.bin
+
+# 内部研究笔记(含未发表负面/RED LINE), 只在私有库
+v2/artifacts/knn_hyperparam_sweep.json
+v2/artifacts/RESULTS_LOG.md

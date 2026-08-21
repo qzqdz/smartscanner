@@ -1,0 +1,82 @@
+{
+  "n_relabeled": 1227,
+  "gallery": 953,
+  "query": 274,
+  "partial": true,
+  "dirty_arm": {
+    "macro_F1": 0.3751,
+    "macro_AUC": 0.6598,
+    "ac_recall": 0.3043,
+    "per_class": {
+      "y_ac": {
+        "P": 0.6364,
+        "R": 0.3043,
+        "F1": 0.4118,
+        "AUC": 0.6515,
+        "pos": 46
+      },
+      "y_re": {
+        "P": 0.4444,
+        "R": 0.3,
+        "F1": 0.3582,
+        "AUC": 0.66,
+        "pos": 80
+      },
+      "y_ar": {
+        "P": 0.5,
+        "R": 0.2439,
+        "F1": 0.3279,
+        "AUC": 0.6876,
+        "pos": 41
+      },
+      "y_uc": {
+        "P": 0.4348,
+        "R": 0.375,
+        "F1": 0.4027,
+        "AUC": 0.64,
+        "pos": 80
+      }
+    }
+  },
+  "clean_arm": {
+    "macro_F1": 0.4086,
+    "macro_AUC": 0.6529,
+    "ac_recall": 0.3043,
+    "per_class": {
+      "y_ac": {
+        "P": 0.28,
+        "R": 0.3043,
+        "F1": 0.2917,
+        "AUC": 0.5946,
+        "pos": 46
+      },
+      "y_re": {
+        "P": 0.75,
+        "R": 0.3,
+        "F1": 0.4286,
+        "AUC": 0.6495,
+        "pos": 80
+      },
+      "y_ar": {
+        "P": 0.6154,
+        "R": 0.3902,
+        "F1": 0.4776,
+        "AUC": 0.7013,
+        "pos": 41
+      },
+      "y_uc": {
+        "P": 0.4235,
+        "R": 0.45,
+        "F1": 0.4364,
+        "AUC": 0.666,
+        "pos": 80
+      }
+    }
+  },
+  "clean_minus_dirty": {
+    "macro_F1": 0.0335,
+    "macro_AUC": -0.0069,
+    "ac_recall": 0.0
+  },
+  "design": "matched-n train-side; only training label source varies; both eval vs clean; clean gallery votes both arms"
+}

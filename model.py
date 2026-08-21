@@ -6,9 +6,23 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from transformers import BertModel, AutoConfig,AutoModel
-from capsule_layer import CapsuleLinear,CapsuleConv2d
 
-from src.modeling.network.rankcse.models import ListNet
+# 向后兼容: 老项目有 capsule_layer + rankcse.models.ListNet, 但本仓库未打包这些依赖
+# teacher=False 时不需要 ListNet, 让 import 软失败即可
+try:
+    from capsule_layer import CapsuleLinear, CapsuleConv2d  # noqa: F401
+except ImportError:
+    CapsuleLinear = None
+    CapsuleConv2d = None
+    import warnings as _w
+    _w.warn("[model.py] capsule_layer not found; using default nn.Linear/nn.Conv2d fallbacks (not used by CCRNet)")
+
+try:
+    from src.modeling.network.rankcse.models import ListNet  # noqa: F401
+except ImportError as _e:
+    ListNet = None
+    import warnings as _w
+    _w.warn(f"[model.py] ListNet unavailable ({_e}); teacher distillation disabled by default")
 
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
